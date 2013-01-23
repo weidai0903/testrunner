@@ -6,24 +6,41 @@ import subprocess as sp
 
 def parseTest(msg, student, killed, options):
     ''' parse stderr and figure out what's wrong'''
-    result = open(student, 'w+')
+    separator = '\n==============================\n'
+    # open source file and check style
+    p = sp.Popen([options['EDITOR'], options['TESTTARGET']])
+    p.wait();
+    style = raw_input("enter style comments:")
+    # handled exceptional scripts
+    optional = "";
+    out = "";
     if (killed):
-        out = 'process killed (possibly infinite loop), need manual test'
+        print student, '\'s test is killed, need manual test and save output file'
+        processed = False
+        while not processed:
+            done = raw_input("manual test finished? (yes/no)").strip().lower()
+            if done == 'yes' or done == 'y':
+                optional = raw_input("enter optional comments and test output: ").strip().lower()
+                processed = True
     else:
         out = parseError(msg, options)
-    result.write(out)
+    # write result
+    result = open(student, 'w+')
+    output = 'style comments:\n' + style + separator + \
+             'other comments:\n' + optional + separator + \
+             'test output:\n' + out
+    result.write(output)
     result.close()
 
 def parseError(msg, options):
     err = 0
     for c in msg:
-        if c == 'F':
+        if c == 'F' or c == 'E': # failure or error
             err = err + 1
         elif c == '\n':
             break
-    out = 'Point deductions: ' + str(err * options['FAILEDTESTPOINTS'])
-    out = out + '\nDetails:\n'
-    return out + msg
+    out = '\n\nFailed tests deductions: ' + str(err * options['FAILEDTESTPOINTS'])
+    return msg + out
 
 def runTests(options):
     fNames = os.listdir(options['FOLDER'])
@@ -36,7 +53,7 @@ def runTests(options):
         print(fName)
         shutil.copyfile(options['FOLDER'] + fName, options['TESTTARGET'])
         try :
-            p = sp.Popen(['python', options['TESTSCRIPT']], stdout=sp.PIPE, stderr=sp.PIPE);
+            p = sp.Popen([options['TESTCMD'], options['TESTSCRIPT']], stdout=sp.PIPE, stderr=sp.PIPE);
             t = 0
             ret = None
             killed = False
@@ -73,9 +90,11 @@ def main():
         'TINTERVAL':0.1,
         'FOLDER':'submissions/',
         'RESULTS':'results/',
+        'TESTCMD': 'python',
         'TESTSCRIPT':'number_personalities_test.py',
         'TESTTARGET':'number_personalities.py',
-        'FAILEDTESTPOINTS':5
+        'FAILEDTESTPOINTS':5,
+        'EDITOR':'vim'
         }
 
     runTests(options)
