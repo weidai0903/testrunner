@@ -20,7 +20,7 @@ def parseTest(msg, student, killed, options):
         while not processed:
             done = raw_input("manual test finished? (yes/no)").strip().lower()
             if done == 'yes' or done == 'y':
-                optional = raw_input("enter optional comments and test output: ").strip().lower()
+                optional = raw_input("enter optional comments and test output: ")
                 processed = True
     else:
         out = parseError(msg, options)
