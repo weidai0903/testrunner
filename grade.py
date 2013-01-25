@@ -20,7 +20,7 @@ def parseTest(msg, student, killed, options):
         while not processed:
             done = raw_input("manual test finished? (yes/no)").strip().lower()
             if done == 'yes' or done == 'y':
-                optional = raw_input("enter optional comments and test output: ")
+                optional = raw_input("enter optional comments and test output: ").strip().lower()
                 processed = True
     else:
         out = parseError(msg, options)
@@ -77,7 +77,10 @@ def runTests(options):
             print "Unexpected error:", sys.exc_info()[0]
         os.remove(options['TESTTARGET'])
         try:
-            os.remove(options['TESTTARGET'] + 'c')
+            if options['TESTCMD'] == 'python'
+                os.remove(options['TESTTARGET'] + 'c')
+            elif options['TESTCMD'] == 'java'
+                os.remove(options['TESTTARGET'].split('.')[0] + '.class')
         except:
             print 'no pyc file created'
         count = count + 1
